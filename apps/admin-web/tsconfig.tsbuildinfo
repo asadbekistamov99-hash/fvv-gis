@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/api.ts","./src/copy.ts","./src/i18n.ts","./src/main.tsx","./src/types.ts","./src/vite-env.d.ts","./src/components/EmployeeAccess.tsx","./src/components/MapView.tsx","./src/components/RoutesView.tsx","./src/test/api.test.ts","./src/test/setup.ts","./vite.config.ts"],"version":"5.9.3"}

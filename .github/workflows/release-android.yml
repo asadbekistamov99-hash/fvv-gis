@@ -1,0 +1,63 @@
+name: Signed Android release
+on:
+  workflow_dispatch:
+    inputs:
+      api_url:
+        description: Approved HTTPS API URL ending in /api/v1
+        required: true
+      release_ref:
+        description: Reviewed source commit SHA or release tag
+        required: true
+permissions:
+  contents: read
+jobs:
+  signed-android:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      FLUTTER_SUPPRESS_ANALYTICS: 'true'
+      DASH__SUPPRESS_ANALYTICS: 'true'
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.release_ref }}
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - name: Install pinned Flutter
+        working-directory: .
+        run: |
+          git clone --depth 1 --branch 3.47.8 https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+      - name: Load signing configuration
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: python ../../scripts/android-signing.py
+      - run: flutter pub get --enforce-lockfile
+      - run: dart run build_runner build --delete-conflicting-outputs
+      - run: flutter analyze
+      - run: flutter test
+      - name: Build signed APK and AAB
+        env:
+          API_URL: ${{ inputs.api_url }}
+        run: |
+          python -c 'import os,urllib.parse; u=urllib.parse.urlparse(os.environ["API_URL"]); assert u.scheme=="https" and u.hostname and u.path.endswith("/api/v1")'
+          flutter build apk --release --dart-define=API_BASE_URL="$API_URL"
+          flutter build appbundle --release --dart-define=API_BASE_URL="$API_URL"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signed-android-release
+          path: |
+            apps/mobile/build/app/outputs/flutter-apk/app-release.apk
+            apps/mobile/build/app/outputs/bundle/release/app-release.aab
+      - name: Remove signing files
+        if: always()
+        run: rm -f android/key.properties android/release.keystore

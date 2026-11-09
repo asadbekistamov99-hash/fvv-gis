@@ -1,0 +1,29 @@
+services:
+  db:
+    ports: !reset []
+  redis:
+    ports: !reset []
+  api:
+    ports: !reset []
+    environment:
+      APP_ENV: production
+      DEV_OTP_ENABLED: 'false'
+      FIREBASE_CREDENTIALS_PATH: /run/secrets/firebase.json
+    volumes:
+      - ${FIREBASE_CREDENTIALS_FILE:?Supply the approved Firebase service-account file}:/run/secrets/firebase.json:ro
+    read_only: true
+    tmpfs:
+      - /tmp
+  worker:
+    environment:
+      APP_ENV: production
+      DEV_OTP_ENABLED: 'false'
+      FIREBASE_CREDENTIALS_PATH: /run/secrets/firebase.json
+    volumes:
+      - ${FIREBASE_CREDENTIALS_FILE:?Supply the approved Firebase service-account file}:/run/secrets/firebase.json:ro
+  martin:
+    ports: !reset []
+  gateway:
+    ports: !override
+      - '80:80'
+      - '443:443'

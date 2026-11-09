@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+runtime_args=()
+if [[ -f "$project_root/.env.runtime" ]]; then runtime_args=(--env-file "$project_root/.env.runtime"); fi
+exec docker compose --env-file "$project_root/.env" "${runtime_args[@]}" -f "$project_root/infrastructure/docker/compose.yml" "$@"

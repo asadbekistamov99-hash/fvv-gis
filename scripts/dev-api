@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+set -euo pipefail
+project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+if [[ ! -f "$project_root/.env" ]]; then python "$project_root/scripts/init-env.py"; fi
+cd "$project_root/services/api"
+uv sync --frozen --group dev
+uv run --env-file "$project_root/.env" alembic upgrade head
+uv run --env-file "$project_root/.env" python -m app.cli seed-demo
+uv run --env-file "$project_root/.env" python "$project_root/scripts/configure-db-roles.py"
+exec env -u POSTGRES_PASSWORD -u MIGRATION_DATABASE_URL -u RESTORE_DATABASE_URL \
+  -u RETENTION_DATABASE_URL -u S3_ADMIN_ACCESS_KEY -u S3_ADMIN_SECRET_KEY \
+  uv run --env-file "$project_root/.env.application" uvicorn app.main:app \
+  --host 0.0.0.0 --port "${API_PORT:-8000}" --no-access-log "$@"

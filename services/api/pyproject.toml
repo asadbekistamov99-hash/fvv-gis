@@ -1,0 +1,24 @@
+[project]
+name = "fvv-gis-api"
+version = "0.1.0"
+description = "Independent Uzbekistan infrastructure GIS evaluation platform"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "fastapi>=0.115,<1", "uvicorn[standard]>=0.34,<1", "SQLAlchemy>=2.0,<3",
+  "alembic>=1.14,<2", "pydantic>=2.9,<3", "pydantic-settings>=2.7,<3",
+  "psycopg[binary]>=3.2,<4", "GeoAlchemy2>=0.17,<1", "redis>=5,<9", "rq>=2,<4",
+  "boto3>=1.35,<2", "httpx>=0.28,<1", "PyJWT[crypto]>=2.10,<3", "pyotp>=2.9,<3",
+  "python-multipart>=0.0.20,<1", "phonenumbers>=9,<10", "shapely>=2,<3", "google-auth[requests]>=2,<3",
+]
+
+[dependency-groups]
+dev = ["pytest>=8,<10", "pytest-asyncio>=0.25,<2", "ruff>=0.9,<1"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 110
