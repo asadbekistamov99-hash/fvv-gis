@@ -11,11 +11,11 @@ from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.core.policy import ADMIN_ROLES, effective_roles
-from app.core.security import decode_token, decrypt_secret, encode_token, encrypt_secret, hash_secret, random_token, token_hash
+from app.core.security import decode_token, decrypt_secret, encode_token, encrypt_secret, hash_password, hash_secret, random_token, token_hash, verify_password
 from app.db.base import new_id, utcnow
 from app.db.session import get_db
 from app.models import AuditLog, AuthSession, DeviceRegistration, District, EmployeeVerification, Notification, OTPChallenge, Organization, RefreshToken, Region, RolePermission, User, UserProfile
-from app.schemas.auth import MFAEnrollRequest, MFAVerifyRequest, PhoneRequest, ProfileUpdate, RefreshRequest, RegisterRequest, VerifyRequest
+from app.schemas.auth import MFAEnrollRequest, MFAVerifyRequest, PasswordLoginRequest, PhoneRequest, ProfileUpdate, RefreshRequest, RegisterRequest, VerifyRequest
 
 router = APIRouter(tags=["Authentication"])
 bearer = HTTPBearer(auto_error=False)
@@ -97,7 +97,27 @@ def register(payload: RegisterRequest, db: Session = Depends(get_db)):
             district = db.get(District, payload.district_id)
             if not district or district.region_id != payload.region_id:
                 raise error(422, "invalid_district", "Tuman hududga mos emas")
-    return create_challenge(db, payload.phone, "register", payload.model_dump())
+    data = payload.model_dump(exclude={"password"})
+    data["password_hash"] = hash_password(payload.password)
+    return create_challenge(db, payload.phone, "register", data)
+
+
+@router.post("/auth/login/password")
+def login_with_password(payload: PasswordLoginRequest, db: Session = Depends(get_db)):
+    user = db.scalar(select(User).where(User.phone == payload.phone))
+    password_ok = verify_password(payload.password, user.password_hash if user else None)
+    if not user or not password_ok or not user.is_active or user.deleted_at:
+        audit(db, "auth.password_failed", user.id if user else None, outcome="denied")
+        db.commit()
+        raise error(401, "invalid_credentials", "Telefon yoki parol noto‘g‘ri")
+    intake_allowed(user.is_synthetic)
+    if user.role in ADMIN_ROLES or user.mfa_enabled:
+        # Privileged accounts keep the SMS code plus MFA path; a password alone never grants them access.
+        raise error(403, "otp_required", "Ushbu hisob uchun SMS kod orqali kiring")
+    result = issue_session(db, user, payload.device_id)
+    audit(db, "auth.login_password", user.id)
+    db.commit()
+    return result
 
 
 @router.post("/auth/login", status_code=202)
@@ -146,7 +166,7 @@ def verify_phone(payload: VerifyRequest, db: Session = Depends(get_db)):
                     employee_status="pending_verification" if employee else "none",
                     organization_id=data.get("organization_id"), region_id=data.get("region_id"),
                     district_id=data.get("district_id"), is_synthetic=data.get("is_synthetic", False),
-                    phone_verified_at=utcnow())
+                    phone_verified_at=utcnow(), password_hash=data.get("password_hash"))
         db.add(user)
         db.flush()
         db.add(UserProfile(user_id=user.id, department=data.get("department")))

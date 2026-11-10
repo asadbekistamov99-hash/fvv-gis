@@ -14,7 +14,7 @@ def phone():
 
 
 def register(client, **fields):
-    payload = {"phone": phone(), "full_name": "SINTETIK TEST", "account_type": "citizen", "is_synthetic": True, **fields}
+    payload = {"phone": phone(), "password": "Parol2026x", "full_name": "SINTETIK TEST", "account_type": "citizen", "is_synthetic": True, **fields}
     response = client.post("/api/v1/auth/register", json=payload)
     assert response.status_code == 202, response.text
     return payload, response.json()
@@ -41,6 +41,39 @@ def test_citizen_registration_otp_session_and_refresh_rotation(client):
     assert rotated.json()["refresh_token"] != tokens["refresh_token"]
     assert client.post("/api/v1/auth/refresh", json={"refresh_token": tokens["refresh_token"]}).status_code == 401
     assert client.get("/api/v1/users/me", headers={"Authorization": f"Bearer {rotated.json()['access_token']}"}).status_code == 401
+
+
+def test_phone_and_password_registration_then_password_login(client, db):
+    payload, challenge = register(client)
+    tokens = verify(client, challenge)
+    assert tokens["user"]["role"] == "citizen"
+    stored = db.scalar(select(User).where(User.phone == payload["phone"]))
+    assert stored.password_hash and "Parol2026x" not in stored.password_hash
+    ok = client.post("/api/v1/auth/login/password", json={"phone": payload["phone"], "password": "Parol2026x"})
+    assert ok.status_code == 200, ok.text
+    assert ok.json()["user"]["phone"] == payload["phone"]
+    wrong = client.post("/api/v1/auth/login/password", json={"phone": payload["phone"], "password": "Notogri999"})
+    assert wrong.status_code == 401
+    unknown = client.post("/api/v1/auth/login/password", json={"phone": phone(), "password": "Parol2026x"})
+    assert unknown.status_code == 401 and unknown.json()["detail"]["code"] == "invalid_credentials"
+
+
+def test_password_login_never_grants_administrators(client, db):
+    from app.core.security import hash_password
+    admin = User(phone=phone(), full_name="SINTETIK ADMIN", role="system_administrator", is_synthetic=True,
+                 phone_verified_at=utcnow(), password_hash=hash_password("Parol2026x"))
+    db.add(admin)
+    db.flush()
+    response = client.post("/api/v1/auth/login/password", json={"phone": admin.phone, "password": "Parol2026x"})
+    assert response.status_code == 403
+    assert response.json()["detail"]["code"] == "otp_required"
+
+
+def test_registration_requires_letter_and_digit_password(client):
+    response = client.post("/api/v1/auth/register", json={
+        "phone": phone(), "password": "onlyletters", "full_name": "SINTETIK TEST", "is_synthetic": True,
+    })
+    assert response.status_code == 422
 
 
 def test_registration_rejects_client_role_injection_and_expired_otp(client, db):

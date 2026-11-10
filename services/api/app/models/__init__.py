@@ -62,6 +62,7 @@ class User(IdentityMixin, TimestampMixin, Base):
     policy_epoch: Mapped[int] = mapped_column(Integer, default=1)
     mfa_secret: Mapped[str | None] = mapped_column(Text, nullable=True)
     mfa_enabled: Mapped[bool] = mapped_column(Boolean, default=False)
+    password_hash: Mapped[str | None] = mapped_column(Text, nullable=True)
     deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
 
