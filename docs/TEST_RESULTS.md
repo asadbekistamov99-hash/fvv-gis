@@ -39,3 +39,12 @@ The full PostgreSQL/API suite exercises:
 - No official dispatch service, production dataset, production hosting, real employee affiliation, or live citizen-service operation was exercised.
 - S3, ClamAV, OSRM, signed release artifacts, restore exercises against operator backups, and production security/governance acceptance require their own execution evidence.
 - An APK or AAB must not be reported as generated until the build succeeds and the artifact is verified to exist.
+
+## Current continuation run — 2026-11-10 UTC
+
+- Backend revalidation: **65 passed**; PostGIS migration and Redis readiness passed.
+- Admin panel revalidation: **8 tests passed**; TypeScript/Vite production build passed.
+- Operations scripts: **5 passed**.
+- Flutter SDK source pinned at `3.47.8` was prepared under the workspace toolchain directory, but its Dart SDK bootstrap was blocked by the managed network policy (`storage.googleapis.com` returned HTTP 403). The environment configuration service also failed to save the required allowlist update. Therefore Flutter dependency resolution, code generation, analyzer, mobile tests, and Android APK/AAB builds remain **unrun**.
+- No APK artifact exists from this run. Do not claim an APK until the Dart SDK download is allowed and the full Flutter/Gradle sequence completes.
+- Once network access is available, the reproducible mobile sequence is: `flutter pub get --enforce-lockfile`; `dart run build_runner build --delete-conflicting-outputs`; `flutter analyze`; `flutter test`; `flutter build apk --debug --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1`. For release, run the same checks followed by `flutter build apk --release` and `flutter build appbundle --release` with an approved HTTPS `/api/v1` URL and signing secrets supplied only through the protected environment.
