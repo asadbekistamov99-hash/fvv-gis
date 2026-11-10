@@ -20,8 +20,14 @@ class PhoneRequest(BaseModel):
         return phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
 
 
+class PasswordLoginRequest(PhoneRequest):
+    model_config = ConfigDict(extra="forbid")
+    password: str = Field(min_length=1, max_length=128)
+
+
 class RegisterRequest(PhoneRequest):
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
+    password: str = Field(min_length=8, max_length=128)
     full_name: str = Field(min_length=2, max_length=200)
     account_type: Literal["citizen", "employee"] = Field(default="citizen", validation_alias=AliasChoices("account_type", "registration_type", "user_type"))
     organization_id: str | None = None
@@ -32,6 +38,13 @@ class RegisterRequest(PhoneRequest):
     verification_reference: str | None = Field(default=None, max_length=200)
     requested_role: str = Field(default="verified_employee", max_length=40)
     is_synthetic: bool = False
+
+    @field_validator("password")
+    @classmethod
+    def strong_enough(cls, value: str) -> str:
+        if not any(ch.isalpha() for ch in value) or not any(ch.isdigit() for ch in value):
+            raise ValueError("Parolda kamida bitta harf va bitta raqam bo‘lsin")
+        return value
 
 
 class VerifyRequest(BaseModel):

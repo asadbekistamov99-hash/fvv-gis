@@ -17,6 +17,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
   final form = GlobalKey<FormState>();
   final phone = TextEditingController(text: '+998');
   final name = TextEditingController();
+  final password = TextEditingController();
   final code = TextEditingController();
   final department = TextEditingController();
   final reference = TextEditingController();
@@ -38,7 +39,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
   @override
   void dispose() {
-    for (final c in [phone, name, code, department, reference]) {
+    for (final c in [phone, name, password, code, department, reference]) {
       c.dispose();
     }
     super.dispose();
@@ -57,6 +58,7 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
           await api.post(register ? '/auth/register' : '/auth/login', {
             'phone': phone.text.trim(),
             if (register) 'full_name': name.text.trim(),
+            if (register) 'password': password.text,
             if (register) 'account_type': employee ? 'employee' : 'citizen',
             if (register)
               'is_synthetic': const bool.fromEnvironment(
@@ -212,6 +214,22 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
                           validator: (v) => (v?.trim().length ?? 0) < 2
                               ? t('required')
                               : null,
+                        ),
+                        const SizedBox(height: 16),
+                        TextFormField(
+                          controller: password,
+                          obscureText: true,
+                          decoration: InputDecoration(
+                            labelText: t('password'),
+                            prefixIcon: const Icon(Icons.lock_outline),
+                          ),
+                          validator: (v) {
+                            final value = v ?? '';
+                            final strong = value.length >= 8 &&
+                                RegExp(r'[A-Za-z]').hasMatch(value) &&
+                                RegExp(r'\d').hasMatch(value);
+                            return strong ? null : t('password_rules');
+                          },
                         ),
                         const SizedBox(height: 20),
                         SegmentedButton<bool>(

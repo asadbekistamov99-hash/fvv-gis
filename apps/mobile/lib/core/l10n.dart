@@ -37,6 +37,8 @@ class L10n {
       'en': 'Phone number',
     },
     'name': {'uz': 'To‘liq ism', 'ru': 'Полное имя', 'en': 'Full name'},
+    'password': {'uz': 'Parol', 'ru': 'Пароль', 'en': 'Password'},
+    'password_rules': {'uz': 'Kamida 8 belgi, harf va raqam', 'ru': 'Минимум 8 символов, буквы и цифры', 'en': 'At least 8 characters with letters and digits'},
     'continue': {'uz': 'Davom etish', 'ru': 'Продолжить', 'en': 'Continue'},
     'verify': {'uz': 'Tasdiqlash', 'ru': 'Подтвердить', 'en': 'Verify'},
     'code': {
