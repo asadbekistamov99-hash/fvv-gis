@@ -12,7 +12,7 @@ O‘zbekiston uchun mustaqil ishlab chiqilgan **Kotlin + Jetpack Compose** asosi
 - **GIS va Geometriya**: Uzbekistan chegaralari, Orol/Aydarko‘l konturlari va GeoJSON (`Point` / `LineString` / `Polygon`) bilan ishlovchi interaktiv pan/zoom Canvas xaritasi, Haversine masofasi va marshrutdan og‘ish tekshiruvi.
 - **Media tanlash**: Ruxsatsiz Android Photo Picker (`PickVisualMedia`) va Storage Access Framework (`OpenDocument`).
 
-## Demo hisoblar (OTP: `123456`)
+## Demo hisoblar (OTP kodi faqat debug versiyada ekranda ko‘rsatiladi)
 
 | Rol | Telefon | Imkoniyatlar |
 | --- | --- | --- |

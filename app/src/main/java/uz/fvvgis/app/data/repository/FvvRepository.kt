@@ -7,6 +7,7 @@ import uz.fvvgis.app.core.GeoUtils
 import uz.fvvgis.app.data.local.*
 import uz.fvvgis.app.data.preferences.AppPreferences
 import uz.fvvgis.app.data.preferences.UserPreferences
+import java.security.SecureRandom
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -86,6 +87,8 @@ class FvvRepository(
     suspend fun setDarkTheme(dark: Boolean) = prefs.setDarkTheme(dark)
     suspend fun setOfflineMode(offline: Boolean) = prefs.setOfflineMode(offline)
 
+    private fun newOtpCode(): String = (100_000 + SecureRandom().nextInt(900_000)).toString()
+
     suspend fun requestLoginOtp(phone: String): Result<OtpChallenge> {
         val account = db.accountDao().getByPhone(phone.trim())
             ?: return Result.failure(IllegalStateException("Bu telefon raqami ro‘yxatdan o‘tmagan. Demo hisobdan foydalaning yoki ro‘yxatdan o‘ting."))
@@ -93,7 +96,7 @@ class FvvRepository(
             OtpChallenge(
                 challengeId = UUID.randomUUID().toString(),
                 phone = account.phone,
-                devOtp = "123456",
+                devOtp = newOtpCode(),
                 isRegister = false,
                 pendingAccount = account
             )
@@ -130,7 +133,7 @@ class FvvRepository(
             OtpChallenge(
                 challengeId = UUID.randomUUID().toString(),
                 phone = newAccount.phone,
-                devOtp = "123456",
+                devOtp = newOtpCode(),
                 isRegister = true,
                 pendingAccount = newAccount
             )
@@ -139,7 +142,7 @@ class FvvRepository(
 
     suspend fun verifyOtp(challenge: OtpChallenge, code: String): Result<UserAccountEntity> {
         if (code.trim() != challenge.devOtp) {
-            return Result.failure(IllegalArgumentException("Tasdiqlash kodi noto‘g‘ri (demo kod: ${challenge.devOtp})."))
+            return Result.failure(IllegalArgumentException("Tasdiqlash kodi noto‘g‘ri."))
         }
         val account = challenge.pendingAccount
             ?: return Result.failure(IllegalStateException("Hisob topilmadi."))

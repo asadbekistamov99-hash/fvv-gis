@@ -1,5 +1,6 @@
 package uz.fvvgis.app.ui.screens
 
+import uz.fvvgis.app.BuildConfig
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -264,10 +265,12 @@ fun AuthScreen(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     SyntheticBadge(locale)
-                    Text(
-                        text = "OTP: ${challenge.devOtp}",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                    )
+                    if (BuildConfig.DEBUG) {
+                        Text(
+                            text = "OTP: ${challenge.devOtp}",
+                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                        )
+                    }
                 }
             }
             OutlinedTextField(
