@@ -55,9 +55,11 @@ Browser run (headless Chromium against the live API and the Vite dev server), **
 11. Verified employee OTP sign-in: operational navigation without citizen items, registry table and profile.
 12. Phone-width layout of the landing and registration pages without horizontal overflow.
 
+A separate browser run submitted a report with a PNG attachment: the upload succeeded and the file was listed as quarantined, as expected without ClamAV.
+
 ## Not executed
 
 - The basemap: no Martin tile server ran here, so tile requests returned 503 and the map showed objects on a blank background.
 - The Docker stack itself (the Docker daemon was unavailable), including the gateway image build, Redis, S3, ClamAV and OSRM.
-- Attachment upload from the report form, live Eskiz SMS and Firebase push.
+- Antivirus release of uploaded files (no ClamAV), live Eskiz SMS and Firebase push.
 - No official dispatch service, production dataset, production hosting, real employee affiliation or live citizen-service operation was exercised.
