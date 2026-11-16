@@ -1,0 +1,9 @@
+services:
+  api:
+    environment:
+      APP_ENV: staging
+      DEV_OTP_ENABLED: 'false'
+  worker:
+    environment:
+      APP_ENV: staging
+      DEV_OTP_ENABLED: 'false'

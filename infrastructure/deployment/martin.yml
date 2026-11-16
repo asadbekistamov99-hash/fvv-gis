@@ -1,0 +1,6 @@
+listen_addresses: '0.0.0.0:3000'
+mbtiles:
+  sources:
+    uzbekistan: /data/uzbekistan.mbtiles
+fonts:
+  - /data/fonts

@@ -1,0 +1,162 @@
+name: fvv-gis
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:?Run scripts/init-env.py}
+      POSTGRES_USER: ${POSTGRES_USER:?Run scripts/init-env.py}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Run scripts/init-env.py}
+    ports:
+      - "127.0.0.1:${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+    restart: unless-stopped
+  redis:
+    image: redis:8.2-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    ports:
+      - "127.0.0.1:${REDIS_PORT:-6379}:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+  api:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/api.Dockerfile
+    # Deliberate allowlist: migration, PostgreSQL-owner, storage-admin and
+    # retention-role credentials must never enter API/worker processes.
+    environment: &application_environment
+      APP_ENV: ${APP_ENV:-development}
+      DATABASE_URL: ${CONTAINER_DATABASE_URL:?Run scripts/init-env.py}
+      PUBLIC_DATABASE_URL: ${CONTAINER_PUBLIC_DATABASE_URL:-}
+      SECRET_KEY: ${SECRET_KEY:?Run scripts/init-env.py}
+      DEV_OTP_ENABLED: ${DEV_OTP_ENABLED:-false}
+      ALLOW_SYNTHETIC_REGISTRATION: ${ALLOW_SYNTHETIC_REGISTRATION:-false}
+      REGISTRATION_ORGANIZATION_IDS: ${REGISTRATION_ORGANIZATION_IDS:-}
+      SMS_PROVIDER: ${SMS_PROVIDER:-development}
+      ESKIZ_EMAIL: ${ESKIZ_EMAIL:-}
+      ESKIZ_PASSWORD: ${ESKIZ_PASSWORD:-}
+      ESKIZ_SENDER: ${ESKIZ_SENDER:-4546}
+      ESKIZ_BASE_URL: ${ESKIZ_BASE_URL:-https://notify.eskiz.uz/api}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8000}
+      LIVE_INTAKE_ENABLED: ${LIVE_INTAKE_ENABLED:-false}
+      OPERATOR_NAME: ${OPERATOR_NAME:-}
+      OPERATOR_CONTACT: ${OPERATOR_CONTACT:-}
+      RESPONSIBLE_TEAM: ${RESPONSIBLE_TEAM:-}
+      RETENTION_POLICY_REFERENCE: ${RETENTION_POLICY_REFERENCE:-}
+      RETENTION_POLICY_APPROVED: ${RETENTION_POLICY_APPROVED:-false}
+      REPORT_RETENTION_DAYS: ${REPORT_RETENTION_DAYS:-}
+      AUDIT_RETENTION_DAYS: ${AUDIT_RETENTION_DAYS:-}
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-}
+      OFFLINE_LEASE_HOURS: ${OFFLINE_LEASE_HOURS:-8}
+      REDIS_URL: redis://redis:6379/0
+      STORAGE_BACKEND: ${STORAGE_BACKEND:-local}
+      S3_ENDPOINT_URL: http://storage:8333
+      S3_ACCESS_KEY: ${S3_ACCESS_KEY:-}
+      S3_SECRET_KEY: ${S3_SECRET_KEY:-}
+      S3_BUCKET: ${S3_BUCKET:-fvv-private}
+      UPLOAD_DIRECTORY: /app/uploads
+      UPLOAD_MAX_BYTES: ${UPLOAD_MAX_BYTES:-20971520}
+      CLAMAV_HOST: ${CLAMAV_HOST:-}
+      CLAMAV_PORT: ${CLAMAV_PORT:-3310}
+      FIREBASE_CREDENTIALS_PATH: ${FIREBASE_CREDENTIALS_PATH:-}
+      OSRM_URL: http://osrm:5000
+      OSRM_SOURCE_DATE: ${OSRM_SOURCE_DATE:-unknown}
+      TILES_UPSTREAM_URL: http://martin:3000
+      MAP_STYLE_URL: /tiles/style.json
+      RETENTION_LEDGER_DIRECTORY: /app/retention-ledger
+    ports:
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/uploads
+      - retention_ledger:/app/retention-ledger
+    restart: unless-stopped
+  worker:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/api.Dockerfile
+    environment: *application_environment
+    command: ["python", "-m", "app.worker"]
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/uploads
+      - retention_ledger:/app/retention-ledger
+    profiles: ["jobs"]
+    restart: unless-stopped
+  storage:
+    image: chrislusf/seaweedfs:4.52
+    command: ["server", "-dir=/data", "-s3", "-s3.port=8333", "-s3.config=/etc/seaweedfs/s3.json", "-ip=storage"]
+    volumes:
+      - object_data:/data
+      - ../../.secrets/s3.json:/etc/seaweedfs/s3.json:ro
+    profiles: ["storage"]
+    restart: unless-stopped
+  martin:
+    image: ghcr.io/maplibre/martin:1.15.0
+    command: ["--config", "/config/martin.yml"]
+    volumes:
+      - ../../data/maps:/data:ro
+      - ../deployment/martin.yml:/config/martin.yml:ro
+    ports:
+      - "127.0.0.1:${TILES_PORT:-3000}:3000"
+    profiles: ["maps"]
+    restart: unless-stopped
+  osrm:
+    image: ghcr.io/project-osrm/osrm-backend:v26.11.0
+    command: ["osrm-routed", "--algorithm", "mld", "/data/uzbekistan-latest.osrm"]
+    volumes:
+      - ../../data/routing:/data:ro
+    profiles: ["routing"]
+    restart: unless-stopped
+  clamav:
+    image: clamav/clamav:1.4
+    volumes:
+      - antivirus_data:/var/lib/clamav
+    profiles: ["scanning"]
+    restart: unless-stopped
+  gateway:
+    build:
+      context: ../..
+      dockerfile: infrastructure/docker/gateway.Dockerfile
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:8080}
+      ACME_EMAIL: ${ACME_EMAIL:-}
+    ports:
+      - "${HTTP_PORT:-8080}:8080"
+      - "${HTTPS_PORT:-8443}:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    profiles: ["gateway"]
+    restart: unless-stopped
+volumes:
+  postgres_data:
+  redis_data:
+  uploads:
+  retention_ledger:
+  object_data:
+  antivirus_data:
+  caddy_data:
+  caddy_config:

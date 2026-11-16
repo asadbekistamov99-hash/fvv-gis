@@ -1,0 +1,28 @@
+{$SITE_ADDRESS::8080} {
+    encode zstd gzip
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy same-origin
+        Permissions-Policy "camera=(self), geolocation=(self)"
+        X-Frame-Options DENY
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+        Content-Security-Policy "default-src 'self'; connect-src 'self'; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline'; script-src 'self'; worker-src 'self' blob:; font-src 'self' data:; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
+        -Server
+    }
+    handle /api/* {
+        reverse_proxy api:8000
+    }
+    handle_path /tiles/style.json {
+        root * /srv/map
+        rewrite * /style.json
+        file_server
+    }
+    handle_path /tiles/* {
+        reverse_proxy martin:3000
+    }
+    handle {
+        root * /srv/admin
+        try_files {path} /index.html
+        file_server
+    }
+}
