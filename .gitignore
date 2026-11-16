@@ -20,3 +20,8 @@ google-services.json
 .env
 .secrets/
 *.log
+
+# Build and tool artifacts
+__pycache__/
+node_modules/
+dist/
