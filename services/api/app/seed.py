@@ -4,7 +4,6 @@ from uuid import NAMESPACE_URL, uuid5
 
 from geoalchemy2.shape import from_shape
 from shapely.geometry import shape
-from sqlalchemy import select
 
 from app.core.config import settings
 from app.core.policy import ROLE_PERMISSIONS

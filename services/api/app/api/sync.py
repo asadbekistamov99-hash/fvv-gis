@@ -15,7 +15,7 @@ from sqlalchemy import select, text
 
 from app.api.infrastructure import Actor, Db, ObjectCreate, ObjectPatch, live_gate
 from app.core.config import settings
-from app.core.policy import can_access, is_employee, require_permission, scope_query
+from app.core.policy import can_access, is_employee, require_permission
 from app.core.security import decode_token
 from app.db.session import SessionLocal
 from app.models import AuthSession, InfrastructureObject, SyncChange, SyncCounter, SyncOperation, User

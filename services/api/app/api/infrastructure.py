@@ -14,7 +14,7 @@ from app.core.policy import can_access, require_permission, scope_query
 from app.db.session import get_db
 from app.models import InfrastructureObject, ObjectRevision, PublicObject
 from app.services.registry import (audit, authorized_object, create_object, now, object_dict,
-                                   publish_public, record_change, revision, update_object, visible_data, draft_author, draft_owner_clause)
+                                   publish_public, revision, update_object, visible_data, draft_author, draft_owner_clause)
 
 router = APIRouter(tags=["Infrastructure"])
 Db = Annotated[Session, Depends(get_db)]

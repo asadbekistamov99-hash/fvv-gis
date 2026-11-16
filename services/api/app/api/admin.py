@@ -14,7 +14,7 @@ from app.api.infrastructure import Actor, Db
 from app.core.config import settings
 from app.core.policy import EMPLOYEE_ROLES, can_access, effective_roles, require_global_permission, require_permission, scope_query
 from app.models import (AuditLog, AuthSession, CategorySchemaVersion, CitizenReport, DeviceRegistration,
-    EmployeeVerification, InfrastructureCategory, InfrastructureObject, Notification, Organization,
+    EmployeeVerification, InfrastructureCategory, InfrastructureObject, Organization,
     RoleAssignment, User)
 from app.services.registry import as_json, audit, now, visible_data
 

@@ -14,7 +14,7 @@ from app.core.policy import ADMIN_ROLES, effective_roles
 from app.core.security import decode_token, decrypt_secret, encode_token, encrypt_secret, hash_password, hash_secret, random_token, token_hash, verify_password
 from app.db.base import new_id, utcnow
 from app.db.session import get_db
-from app.models import AuditLog, AuthSession, DeviceRegistration, District, EmployeeVerification, Notification, OTPChallenge, Organization, RefreshToken, Region, RolePermission, User, UserProfile
+from app.models import AuditLog, AuthSession, DeviceRegistration, District, EmployeeVerification, OTPChallenge, Organization, RefreshToken, Region, RolePermission, User, UserProfile
 from app.schemas.auth import MFAEnrollRequest, MFAVerifyRequest, PasswordLoginRequest, PhoneRequest, ProfileUpdate, RefreshRequest, RegisterRequest, VerifyRequest
 
 router = APIRouter(tags=["Authentication"])

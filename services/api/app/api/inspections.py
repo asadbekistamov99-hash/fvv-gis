@@ -8,7 +8,7 @@ from sqlalchemy import select
 from app.api.infrastructure import Actor, Db
 from app.core.policy import require_permission
 from app.models import HydrantMeasurement, Inspection, MaintenanceRecord
-from app.services.registry import STATES, as_json, audit, authorized_object, visible_data
+from app.services.registry import STATES, as_json, audit, authorized_object
 
 router = APIRouter(tags=["Inspections"])
 

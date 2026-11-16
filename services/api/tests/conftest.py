@@ -1,8 +1,6 @@
 """Integration fixtures use a real PostgreSQL/PostGIS transaction per test."""
-import os
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from app.core.config import settings

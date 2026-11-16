@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import socket
 import struct
-from pathlib import Path
 
 import boto3
 from fastapi import HTTPException

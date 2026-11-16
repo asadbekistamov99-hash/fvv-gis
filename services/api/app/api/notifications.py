@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import func, or_, select
+from sqlalchemy import or_, select
 
 from app.api.infrastructure import Actor, Db
 from app.core.policy import can_access, require_global_permission, require_permission
