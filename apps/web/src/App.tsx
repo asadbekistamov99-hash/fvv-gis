@@ -83,6 +83,7 @@ import type {
 import MapView from "./components/LazyMapView";
 import RoutesView from "./components/RoutesView";
 import EmployeeAccess from "./components/EmployeeAccess";
+import Landing from "./Landing";
 import {
   CitizenReports,
   EmergencyNotice,
@@ -148,7 +149,12 @@ const navItems: { id: View; icon: typeof Map; group?: boolean }[] = [
   { id: "settings", icon: Settings, group: true },
   { id: "profile", icon: UserRound, group: true },
 ];
-const citizenViews: View[] = ["publicMap", "myReports", "notifications", "profile"];
+const citizenViews: View[] = [
+  "publicMap",
+  "myReports",
+  "notifications",
+  "profile",
+];
 function usePage<T>(key: unknown[], path: string, enabled = true) {
   return useQuery({
     queryKey: key,
@@ -786,27 +792,37 @@ export default function App() {
     setSidebar(false);
   }
   return (
-    <UI.Provider value={{ language, t, notify, copy, permissions: user?.permissions || [] }}>
+    <UI.Provider
+      value={{
+        language,
+        t,
+        notify,
+        copy,
+        permissions: user?.permissions || [],
+      }}
+    >
       {!user ? (
         <>
-          <div className="login-preferences">
-            <button
-              className="icon-button"
-              aria-label={copy("Theme")}
-              onClick={() => setDark((v) => !v)}
-            >
-              {dark ? <Sun size={20} /> : <Moon size={20} />}
-            </button>
-            <select
-              aria-label={copy("Language")}
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as Language)}
-            >
-              <option value="uz">O‘zbekcha</option>
-              <option value="ru">Русский</option>
-              <option value="en">English</option>
-            </select>
-          </div>
+          {authOpen && (
+            <div className="login-preferences">
+              <button
+                className="icon-button"
+                aria-label={copy("Theme")}
+                onClick={() => setDark((v) => !v)}
+              >
+                {dark ? <Sun size={20} /> : <Moon size={20} />}
+              </button>
+              <select
+                aria-label={copy("Language")}
+                value={language}
+                onChange={(e) => setLanguage(e.target.value as Language)}
+              >
+                <option value="uz">O‘zbekcha</option>
+                <option value="ru">Русский</option>
+                <option value="en">English</option>
+              </select>
+            </div>
+          )}
           {authOpen ? (
             <Auth
               onBack={() => setAuthOpen(false)}
@@ -822,44 +838,16 @@ export default function App() {
               }}
             />
           ) : (
-            <div className="public-shell">
-              <header className="public-header">
-                <Brand />
-                <button
-                  className="button button-primary"
-                  onClick={() => setAuthOpen(true)}
-                >
-                  <UserRound size={18} />
-                  {copy("Kirish")}
-                </button>
-              </header>
-              <main className="public-main">
-                <section className="public-hero">
-                  <span className="eyebrow">UZBEKISTAN · GIS</span>
-                  <h1>{copy("Infratuzilmaning ommaviy xaritasi")}</h1>
-                  <p>
-                    {copy(
-                      "Ommaviy obyektlarni xaritada ko‘ring. Murojaat yuborish va uni kuzatish uchun hisobga kiring.",
-                    )}
-                  </p>
-                  <button
-                    className="button button-outline"
-                    onClick={() => setAuthOpen(true)}
-                  >
-                    <FileText size={18} />
-                    {copy("Murojaat yuborish")}
-                  </button>
-                </section>
-                <EmergencyNotice ui={ui} />
-                <PublicMap ui={ui} />
-                <footer className="page-footer">
-                  <span>{t("independent")}</span>
-                  <span>
-                    EPSG:4326 <span>·</span> v0.1.0
-                  </span>
-                </footer>
-              </main>
-            </div>
+            <Landing
+              ui={ui}
+              dark={dark}
+              onToggleDark={() => setDark((v) => !v)}
+              onLanguage={setLanguage}
+              onSignIn={() => {
+                setAuthOpen(true);
+                window.scrollTo(0, 0);
+              }}
+            />
           )}
         </>
       ) : (
@@ -879,7 +867,9 @@ export default function App() {
               </span>
               <div>
                 <strong>
-                  {copy(isEmployee ? "Operativ boshqaruv" : "Fuqarolar portali")}
+                  {copy(
+                    isEmployee ? "Operativ boshqaruv" : "Fuqarolar portali",
+                  )}
                 </strong>
                 <small>{copy("O‘zbekiston Respublikasi")}</small>
               </div>
@@ -1600,10 +1590,12 @@ function RegistryView({
               {t("registry")}{" "}
               <span className="count-pill">{records.data?.total ?? "—"}</span>
             </h2>
-            {permissions.includes("infrastructure.write") && <button className="text-button" onClick={() => onEdit(null)}>
-              <Plus size={17} />
-              {t("addObject")}
-            </button>}
+            {permissions.includes("infrastructure.write") && (
+              <button className="text-button" onClick={() => onEdit(null)}>
+                <Plus size={17} />
+                {t("addObject")}
+              </button>
+            )}
           </div>
           {records.isLoading ? (
             <Loading />
@@ -1948,53 +1940,59 @@ function ObjectDetail({
           ))}
       </div>
       <div className="modal-footer">
-        {permissions.includes("infrastructure.write") && <button
-          className="button button-outline"
-          onClick={() => onEdit(object)}
-          disabled={busy}
-        >
-          {t("edit")}
-        </button>}
+        {permissions.includes("infrastructure.write") && (
+          <button
+            className="button button-outline"
+            onClick={() => onEdit(object)}
+            disabled={busy}
+          >
+            {t("edit")}
+          </button>
+        )}
         <div>
-          {permissions.includes("infrastructure.write") && ["draft", "requires_correction", "rejected"].includes(
-            object.lifecycle,
-          ) && (
-            <button
-              className="button button-primary"
-              disabled={busy}
-              onClick={() => action("submit")}
-            >
-              {t("submit")}
-              <ArrowRight size={17} />
-            </button>
-          )}
-          {permissions.includes("infrastructure.review") && object.lifecycle === "submitted" && (
-            <button
-              className="button button-primary"
-              disabled={busy}
-              onClick={() => action("review")}
-            >
-              {t("review")}
-            </button>
-          )}
-          {permissions.includes("infrastructure.review") && object.lifecycle === "under_review" && (
-            <button
-              className="button button-primary"
-              disabled={busy}
-              onClick={() => action("approve")}
-            >
-              {t("approve")}
-            </button>
-          )}
-          {permissions.includes("infrastructure.publish") && object.lifecycle === "approved" && (
-            <button
-              className="button button-primary"
-              disabled={busy}
-              onClick={() => action("publish")}
-            >
-              {t("publish")}
-            </button>
-          )}
+          {permissions.includes("infrastructure.write") &&
+            ["draft", "requires_correction", "rejected"].includes(
+              object.lifecycle,
+            ) && (
+              <button
+                className="button button-primary"
+                disabled={busy}
+                onClick={() => action("submit")}
+              >
+                {t("submit")}
+                <ArrowRight size={17} />
+              </button>
+            )}
+          {permissions.includes("infrastructure.review") &&
+            object.lifecycle === "submitted" && (
+              <button
+                className="button button-primary"
+                disabled={busy}
+                onClick={() => action("review")}
+              >
+                {t("review")}
+              </button>
+            )}
+          {permissions.includes("infrastructure.review") &&
+            object.lifecycle === "under_review" && (
+              <button
+                className="button button-primary"
+                disabled={busy}
+                onClick={() => action("approve")}
+              >
+                {t("approve")}
+              </button>
+            )}
+          {permissions.includes("infrastructure.publish") &&
+            object.lifecycle === "approved" && (
+              <button
+                className="button button-primary"
+                disabled={busy}
+                onClick={() => action("publish")}
+              >
+                {t("publish")}
+              </button>
+            )}
         </div>
       </div>
     </Modal>
@@ -2030,11 +2028,7 @@ function ObjectEditor({
     is_synthetic: existing?.is_synthetic ?? true,
   });
   const [geometryText, setGeometryText] = useState(
-    JSON.stringify(
-      existing?.geometry,
-      null,
-      2,
-    ) || "",
+    JSON.stringify(existing?.geometry, null, 2) || "",
   );
   const [geometryType, setGeometryType] = useState<Geometry["type"]>(
     existing?.geometry.type || "Point",
