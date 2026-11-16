@@ -1,0 +1,67 @@
+name: Validate platform
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  operations:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/test_operations.py
+      - run: python -m compileall -q scripts
+  api:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgis/postgis:17-3.5
+        env:
+          POSTGRES_DB: fvv_test
+          POSTGRES_USER: fvv_test
+          POSTGRES_PASSWORD: ci-only-synthetic-database
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U fvv_test -d fvv_test"
+          --health-interval 5s --health-timeout 5s --health-retries 15
+    env:
+      DATABASE_URL: postgresql+psycopg://fvv_test:ci-only-synthetic-database@127.0.0.1:5432/fvv_test
+      TEST_DATABASE_URL: postgresql+psycopg://fvv_test:ci-only-synthetic-database@127.0.0.1:5432/fvv_test
+      APP_ENV: test
+      DEV_OTP_ENABLED: 'true'
+      SECRET_KEY: ci-only-synthetic-secret-key-for-automated-tests-only
+    defaults:
+      run:
+        working-directory: services/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: astral-sh/setup-uv@v6
+      - run: uv sync --frozen --group dev
+      - run: uv run alembic upgrade head
+      - run: uv run pytest -q
+      - run: uv run python -m compileall -q app
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: apps/web/package-lock.json
+      - run: npm ci
+      - run: npm run test --if-present
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web
+          path: apps/web/dist
