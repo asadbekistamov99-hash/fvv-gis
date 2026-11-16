@@ -1,10 +1,14 @@
 # Foydalanish bo‘yicha qisqa qo‘llanma
 
-FVV GIS Uzbekistan mustaqil platformadir. Favqulodda holatda ilovadagi murojaatning ko‘rib chiqilishini kutmang; rasmiy shoshilinch xizmatga qo‘ng‘iroq qiling. Ilova rasmiy dispetcherlik o‘rnini bosmaydi.
+FVV GIS Uzbekistan mustaqil platformadir va bitta veb-sayt sifatida ishlaydi: uni telefon yoki kompyuter brauzerida oching. Favqulodda holatda saytdagi murojaatning ko‘rib chiqilishini kutmang; rasmiy shoshilinch xizmatga qo‘ng‘iroq qiling. Sayt rasmiy dispetcherlik o‘rnini bosmaydi.
+
+## Mehmon
+
+Kirishsiz bosh sahifada ommaviy xarita ochiladi. Hudud, kategoriya va holat bo‘yicha filtrlang yoki obyekt nomini qidiring.
 
 ## Fuqaro
 
-1. Telefon raqamingizni kiriting va OTP kodini tasdiqlang. Test muhiti ko‘rsatgan test kodi haqiqiy SMS deb hisoblanmaydi.
+1. “Kirish” tugmasini bosing. Yangi hisob uchun “Ro‘yxatdan o‘tish”ni tanlang, keyin SMS kod yoki parol bilan kiring. Test muhiti ko‘rsatgan test kodi haqiqiy SMS deb hisoblanmaydi.
 2. Ommaviy xaritada faqat ommaga chiqarishga ruxsat berilgan joylarni ko‘ring. Ko‘rinmayotgan obyekt mavjud emas yoki ishlamaydi degan xulosa qilmang.
 3. Murojaat bo‘limida turini, tavsifini va ixtiyoriy joylashuv/fotosuratni kiriting. GPSga ruxsat bermasdan ham tavsif yuborish mumkin.
 4. Mening murojaatlarim bo‘limida qabul qilish va ko‘rib chiqish holatini kuzating. Qabul qilingan yozuv tasdiqlangan favqulodda hodisa degani emas.
@@ -17,8 +21,8 @@ FVV GIS Uzbekistan mustaqil platformadir. Favqulodda holatda ilovadagi murojaatn
 3. Obyekt qo‘shishda kategoriya, geometriya, umumiy ma’lumot, texnik qiymatlar va hujjatlarni kiriting. Noma’lum qiymatni nol bilan to‘ldirmang.
 4. Qoralama va yuborilgan yozuv holatini tekshiring. Umumiy xaritada tasdiqlanib nashr qilingan versiya ishlatiladi.
 5. Gidrant bosimi va sarfini birlik hamda o‘lchov sanasi bilan o‘qing. Eski o‘lchov yoki xaritadagi belgi bugungi ishga yaroqlilikni kafolatlamaydi.
-6. Offline ishlashdan oldin ruxsat berilgan hududni yuklang. Oxirgi sinxronlash va grant muddatini kuzating. Sakkiz soatdan so‘ng cheklangan ma’lumotni ochish uchun internetga ulanib ruxsatni yangilang.
-7. Sinxronlash konflikti ko‘rsatilsa, serverdagi va mahalliy tahrirni solishtiring. Ilova jim ustidan yozmaydi; hal qilinmagan ishni yo‘qotmasdan vakolatli rahbarga murojaat qiling.
+6. Sayt internet bilan ishlaydi. Aloqa uzilsa ogohlantirish chiqadi va ko‘rsatilgan ma’lumot eskirgan bo‘lishi mumkin.
+7. Bir yozuvni ikki kishi tahrirlasa konflikt ko‘rsatiladi. Sayt jim ustidan yozmaydi: ma’lumotni yangilab, tahrirlarni solishtiring.
 8. Operativ marshrut faqat rahbar tasdig‘i va amal qilish muddati doirasida ishlatiladi; real yo‘l sharoitini joyida baholang.
 
 ## Administrator va tekshiruvchi

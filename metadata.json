@@ -1,8 +1,0 @@
-{
-  "name": "FVV GIS",
-  "description": "Independent role-aware GIS and infrastructure registry for Uzbekistan.",
-  "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}

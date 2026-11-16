@@ -1,6 +1,6 @@
 # Verification results
 
-Only executed checks are recorded as successful. Source files, deployment configuration, and expected artifact paths do not prove a running integration or a successful Android build.
+Only executed checks are recorded as successful. Source files, deployment configuration, and expected artifact paths do not prove a running integration or a working deployment.
 
 ## Backend — 2026-11-09 UTC
 
@@ -27,24 +27,37 @@ The full PostgreSQL/API suite exercises:
 10. Allowlisted pre-registration organization names, protected administrator grants, out-of-scope assignment replacement denial, recipient-only private notifications, and restricted public-notification review queues.
 11. Immediate removal of consumed registration challenges and cleanup of expired authentication challenges without deleting active challenges.
 
-## Other application checks
+## Single-site restructure — 2026-11-16 UTC
 
-- Administration panel: the earlier recorded run completed **8 tests** and a production build. Browser workflow and visual checks need a fresh recorded result before final acceptance.
-- Flutter: dependency resolution and generated models exist. Analyzer/widget-test completion and APK/AAB generation have not yet been confirmed in this report.
-- Operational scripts: the ops agent recorded **5 passing tests** for restore validation and Compose credential boundaries; use final consolidated results when available.
+The Kotlin Android app, the Flutter app and their CI jobs were removed. `apps/admin-web` became `apps/web` and now serves visitors, citizens, employees and administrators.
 
-## External integrations and release status
+Executed in this run, on Python 3.13 with native PostgreSQL 16 / PostGIS 3:
 
-- No live Eskiz SMS or Firebase push message was sent by these tests.
-- No official dispatch service, production dataset, production hosting, real employee affiliation, or live citizen-service operation was exercised.
-- S3, ClamAV, OSRM, signed release artifacts, restore exercises against operator backups, and production security/governance acceptance require their own execution evidence.
-- An APK or AAB must not be reported as generated until the build succeeds and the artifact is verified to exist.
+- `uv run alembic upgrade head`: migrations **0001 and 0002** applied.
+- `uv run pytest -q` in `services/api`: **70 passed, 1 warning** (upstream Starlette/httpx deprecation).
+- `python -m app.cli seed-demo`: 30 objects, 14 regions, 16 categories and the demo accounts.
+- `npm test` in `apps/web`: **9 passed**. `npm run build` (TypeScript + Vite): passed.
+- `python scripts/test_operations.py`: **5 passed**.
+- `docker compose config` for the development, staging and production files: valid.
 
-## Current continuation run — 2026-11-10 UTC
+Browser run (headless Chromium against the live API and the Vite dev server), **12 of 12 steps passed**:
 
-- Backend revalidation: **65 passed**; PostGIS migration and Redis readiness passed.
-- Admin panel revalidation: **8 tests passed**; TypeScript/Vite production build passed.
-- Operations scripts: **5 passed**.
-- Flutter SDK source pinned at `3.47.8` was prepared under the workspace toolchain directory, but its Dart SDK bootstrap was blocked by the managed network policy (`storage.googleapis.com` returned HTTP 403). The environment configuration service also failed to save the required allowlist update. Therefore Flutter dependency resolution, code generation, analyzer, mobile tests, and Android APK/AAB builds remain **unrun**.
-- No APK artifact exists from this run. Do not claim an APK until the Dart SDK download is allowed and the full Flutter/Gradle sequence completes.
-- Once network access is available, the reproducible mobile sequence is: `flutter pub get --enforce-lockfile`; `dart run build_runner build --delete-conflicting-outputs`; `flutter analyze`; `flutter test`; `flutter build apk --debug --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1`. For release, run the same checks followed by `flutter build apk --release` and `flutter build appbundle --release` with an approved HTTPS `/api/v1` URL and signing secrets supplied only through the protected environment.
+1. Public landing without sign-in: public map list, 112 notice, object selection and search filter.
+2. Citizen registration with the development OTP.
+3. Citizen navigation limited to public map, own reports, notifications and profile.
+4. Report submission with browser geolocation, then the report detail view.
+5. Notifications view as a citizen.
+6. Profile name edit and active session list.
+7. Sign-out back to the public page.
+8. Phone and password sign-in.
+9. Account deletion.
+10. Employee application, which shows the pending-review notice.
+11. Verified employee OTP sign-in: operational navigation without citizen items, registry table and profile.
+12. Phone-width layout of the landing and registration pages without horizontal overflow.
+
+## Not executed
+
+- The basemap: no Martin tile server ran here, so tile requests returned 503 and the map showed objects on a blank background.
+- The Docker stack itself (the Docker daemon was unavailable), including the gateway image build, Redis, S3, ClamAV and OSRM.
+- Attachment upload from the report form, live Eskiz SMS and Firebase push.
+- No official dispatch service, production dataset, production hosting, real employee affiliation or live citizen-service operation was exercised.

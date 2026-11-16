@@ -21,7 +21,7 @@
         reverse_proxy martin:3000
     }
     handle {
-        root * /srv/admin
+        root * /srv/web
         try_files {path} /index.html
         file_server
     }
