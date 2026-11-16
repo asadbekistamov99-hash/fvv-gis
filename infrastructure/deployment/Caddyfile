@@ -12,6 +12,9 @@
     handle /api/* {
         reverse_proxy api:8000
     }
+    # Public basemap only: the separately hosted website loads it cross-origin.
+    @tiles path /tiles/*
+    header @tiles Access-Control-Allow-Origin *
     handle_path /tiles/style.json {
         root * /srv/map
         rewrite * /style.json

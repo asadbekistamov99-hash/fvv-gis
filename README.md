@@ -56,6 +56,42 @@ cd apps/web && npm test && npm run build
 python scripts/test_operations.py
 ```
 
+## Serverga joylashtirish (Vercel + VPS)
+
+Sayt Vercel'da, backend esa alohida serverda ishlaydi. Sayt API'ga to'g'ridan-to'g'ri `https://api.sizningdomen.uz` orqali murojaat qiladi. Shunda backend har bir foydalanuvchining haqiqiy IP manzilini ko'radi va so'rov limiti to'g'ri ishlaydi.
+
+**1. Server.** Ubuntu 22.04 yoki 24.04, kamida 4 GB RAM va 40 GB disk. ClamAV kerak bo'lmasa, 2 GB RAM ham yetadi. Bunda `WITH_SCANNING=0` qo'ying.
+
+**2. DNS.** `api.sizningdomen.uz` uchun server IP manziliga yo'naltirilgan `A` yozuv qo'shing. 80 va 443 portlar ochiq bo'lishi kerak.
+
+**3. O'rnatish.** Serverda root sifatida bajaring:
+
+```sh
+curl -fsSLO https://raw.githubusercontent.com/asadbekistamov99-hash/fvv-gis/main/scripts/deploy-server.sh
+API_DOMAIN=api.sizningdomen.uz ACME_EMAIL=siz@misol.uz bash deploy-server.sh
+```
+
+Skript Docker'ni o'rnatadi, kodni `/opt/fvv-gis` ga yuklaydi, sirlarni yaratadi, migratsiyalarni bajaradi, cheklangan huquqli bazaga kirish rollarini sozlaydi va xizmatlarni HTTPS bilan ishga tushiradi. Qayta ishga tushirish xavfsiz: mavjud parollar saqlanadi.
+
+Qo'shimcha sozlamalar:
+
+| O'zgaruvchi | Vazifasi |
+| --- | --- |
+| `WEB_ORIGIN` | Sayt manzili, standart: `https://hozak-nine.vercel.app` |
+| `ESKIZ_EMAIL`, `ESKIZ_PASSWORD` | Eskiz SMS hisobi. Usiz hech kim tizimga kira olmaydi |
+| `ADMIN_PHONE`, `ADMIN_NAME` | Birinchi administratorni yaratadi. Birinchi kirishda MFA majburiy |
+| `WITH_SCANNING=0` | ClamAV'ni o'chiradi. Yuklangan fayllar karantinda qoladi |
+| `BRANCH` | Joylashtiriladigan git branch, standart: `main` |
+
+**4. Vercel.** Loyihaning production muhitiga ikkita o'zgaruvchi qo'shing va qayta deploy qiling:
+
+```sh
+VITE_API_URL=https://api.sizningdomen.uz/api/v1
+VITE_MAP_STYLE_URL=https://api.sizningdomen.uz/tiles/style.json
+```
+
+**Muhim.** Production rejimda kirish va murojaatlar faqat Eskiz sozlangandan keyin ishlaydi. Haqiqiy murojaatlarni qabul qilish uchun yana operator ma'lumotlari va tasdiqlangan saqlash siyosati kerak, so'ng `LIVE_INTAKE_ENABLED=true` qo'yiladi. Bu himoya ataylab qilingan. Ommaviy xarita esa birinchi kundan ishlaydi.
+
 ## Production
 
 To‘liq stack `scripts/compose` orqali ko‘tariladi. Gateway (Caddy) saytni, `/api` ni va `/tiles` ni bitta domendan beradi. Haqiqiy foydalanuvchilarni qabul qilishdan oldin kerak bo‘ladigan narsalar: domen va HTTPS, Eskiz SMS hisobi, operator ma’lumotlari va tasdiqlangan saqlash siyosati, S3 saqlash, ClamAV, ixtiyoriy Firebase. Tafsilotlar: [docs/OPERATIONS.md](docs/OPERATIONS.md).

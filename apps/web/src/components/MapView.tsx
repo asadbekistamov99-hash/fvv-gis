@@ -27,6 +27,31 @@ interface Props {
   /** Overrides the default "operational map" caption, e.g. on the public site. */
   title?: string;
 }
+/** Resolve relative glyph, sprite and tile URLs against the style URL, so a style served by the API host also works from another site origin. */
+export function absoluteStyle(
+  style: maplibregl.StyleSpecification,
+  base: string,
+): maplibregl.StyleSpecification {
+  // Template placeholders such as {z} or {fontstack} must survive URL resolution unescaped.
+  const resolve = (value: string) =>
+    /^[a-z][a-z0-9+.-]*:/i.test(value)
+      ? value
+      : decodeURI(new URL(value, base).href).replace(/%7B/gi, "{").replace(/%7D/gi, "}");
+  const sources = Object.fromEntries(
+    Object.entries(style.sources || {}).map(([id, source]) => {
+      const next = { ...source } as Record<string, unknown>;
+      if (typeof next.url === "string") next.url = resolve(next.url);
+      if (Array.isArray(next.tiles)) next.tiles = next.tiles.map((tile) => resolve(String(tile)));
+      return [id, next];
+    }),
+  ) as maplibregl.StyleSpecification["sources"];
+  return {
+    ...style,
+    sources,
+    ...(typeof style.glyphs === "string" ? { glyphs: resolve(style.glyphs) } : {}),
+    ...(typeof style.sprite === "string" ? { sprite: resolve(style.sprite) } : {}),
+  };
+}
 const blank: maplibregl.StyleSpecification = {
   version: 8,
   sources: {},
@@ -344,7 +369,11 @@ export default function MapView({
           ? "pointer"
           : "";
     });
-    fetch(import.meta.env.VITE_MAP_STYLE_URL || "/tiles/style.json", {
+    const styleUrl = new URL(
+      import.meta.env.VITE_MAP_STYLE_URL || "/tiles/style.json",
+      window.location.href,
+    ).href;
+    fetch(styleUrl, {
       signal: controller.signal,
     })
       .then((r) => {
@@ -353,7 +382,7 @@ export default function MapView({
       })
       .then((style) => {
         if (style.version !== 8) throw Error();
-        if (!disposed) current.setStyle(style);
+        if (!disposed) current.setStyle(absoluteStyle(style, styleUrl));
       })
       .catch(() => {
         if (!disposed) setUnavailable(true);

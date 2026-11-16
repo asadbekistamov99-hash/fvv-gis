@@ -1,0 +1,17 @@
+# Single-server deployment behind the Caddy gateway, with the website hosted
+# elsewhere (for example on Vercel). Use together with the base compose file:
+#   scripts/compose -f infrastructure/deployment/compose.server.yml ...
+# Only the gateway is published; every other service stays on the internal network.
+services:
+  db:
+    ports: !reset []
+  redis:
+    ports: !reset []
+  api:
+    ports: !reset []
+  martin:
+    ports: !reset []
+  gateway:
+    ports: !override
+      - '80:80'
+      - '443:443'

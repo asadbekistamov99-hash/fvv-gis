@@ -63,3 +63,18 @@ A separate browser run submitted a report with a PNG attachment: the upload succ
 - The Docker stack itself (the Docker daemon was unavailable), including the gateway image build, Redis, S3, ClamAV and OSRM.
 - Antivirus release of uploaded files (no ClamAV), live Eskiz SMS and Firebase push.
 - No official dispatch service, production dataset, production hosting, real employee affiliation or live citizen-service operation was exercised.
+
+## Server deployment preparation — 2026-11-16 UTC
+
+`scripts/deploy-server.sh` and `infrastructure/deployment/compose.server.yml` were added for a single Ubuntu server behind Caddy, with the website hosted on Vercel and calling the API cross-origin.
+
+Executed:
+
+- `bash -n` on the script, and its settings step run twice in a scratch copy: production values written, secrets preserved on re-run, no duplicate keys, files mode 600.
+- Migrations, `configure-db-roles.py` and `app.cli seed-catalog` against a fresh local PostGIS database.
+- `docker compose config` of the base file plus the server overlay with all profiles: only the gateway publishes ports (80 and 443); the API uses the restricted `fvv_api_login` role.
+- The rendered API environment passed the production `Settings` validation, and both restricted roles connected to the database.
+- Cross-origin browser run: the site built with an absolute `VITE_API_URL` and served from another origin passed all 12 steps plus the attachment upload. API and tile requests went to the API host and no CORS errors occurred.
+- API tests: 70 passed. Web tests: 9 passed. Build passed. Operations tests: 5 passed.
+
+Not executed: the script itself on a real server (no Docker daemon or server access here), image builds, Caddy certificate issuance, SeaweedFS bucket creation, ClamAV, Martin with the downloaded basemap, and Eskiz SMS.

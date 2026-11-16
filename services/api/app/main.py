@@ -41,7 +41,7 @@ app.add_middleware(
     allow_origins=[value.strip() for value in settings.cors_origins.split(",") if value.strip()],
     allow_credentials=False,
     allow_methods=["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "X-Request-ID"],
+    allow_headers=["Authorization", "Content-Type", "X-Request-ID", "Idempotency-Key"],
     expose_headers=["X-Request-ID", "Retry-After"],
 )
 
