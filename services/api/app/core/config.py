@@ -2,7 +2,7 @@ from functools import lru_cache
 from pathlib import Path
 import secrets
 
-from pydantic import model_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -68,6 +68,15 @@ class Settings(BaseSettings):
                 self.report_retention_days, self.audit_retention_days, self.backup_retention_days
             ))
         )
+
+    @field_validator("database_url", "public_database_url")
+    @classmethod
+    def use_psycopg_driver(cls, value: str) -> str:
+        # Hosted Postgres providers (for example Neon on Vercel) hand out postgres:// URLs.
+        for prefix in ("postgres://", "postgresql://"):
+            if value.startswith(prefix):
+                return "postgresql+psycopg://" + value[len(prefix):]
+        return value
 
     @model_validator(mode="after")
     def check_security(self):

@@ -2,6 +2,7 @@
 from collections import OrderedDict, deque
 from contextlib import asynccontextmanager
 import json
+import os
 import logging
 from pathlib import Path
 import re
@@ -46,12 +47,26 @@ app.add_middleware(
 )
 
 
+def client_address(request: Request) -> str:
+    """Address used for rate limiting.
+
+    On Vercel the function sees the platform proxy, so the visitor address comes from
+    `x-real-ip`, which Vercel's edge sets itself and clients cannot override.
+    Elsewhere uvicorn already resolves forwarded headers from the trusted gateway.
+    """
+    if os.environ.get("VERCEL") == "1":
+        forwarded = request.headers.get("x-real-ip", "").strip()
+        if forwarded:
+            return forwarded
+    return request.client.host if request.client else "unknown"
+
+
 async def rate_limited(request: Request) -> bool:
     if settings.app_env == "test" or not request.url.path.startswith("/api/"):
         return False
     category = "auth" if request.url.path.startswith(("/api/v1/auth/login", "/api/v1/auth/register")) else "api"
     limit = 15 if category == "auth" else 600
-    key = f"{request.client.host if request.client else 'unknown'}:{category}"
+    key = f"{client_address(request)}:{category}"
     if not settings.is_development:
         from redis.asyncio import Redis
         client = Redis.from_url(settings.redis_url, socket_connect_timeout=2, socket_timeout=2)
