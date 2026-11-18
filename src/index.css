@@ -1,0 +1,83 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@font-face {
+  font-family: "Noto Sans";
+  src: url("/fonts/noto_sans.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("/fonts/space_grotesk.ttf") format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --bg: #f0f4f8;
+  --surface: #ffffff;
+  --surface-elevated: #e1eaef;
+  --ink: #102136;
+  --ink-muted: #3d5368;
+  --primary: #006879;
+  --on-primary: #ffffff;
+  --primary-container: #bdeeff;
+  --on-primary-container: #002026;
+  --secondary: #107a56;
+  --secondary-container: #c2f5e0;
+  --on-secondary-container: #002b1c;
+  --tertiary: #8c5a00;
+  --tertiary-container: #ffe4b8;
+  --on-tertiary-container: #2d1b00;
+  --outline: #a5b4c4;
+  --error: #b3261e;
+  --error-container: #ffdad6;
+  --on-error-container: #410002;
+}
+
+html.dark {
+  --bg: #081320;
+  --surface: #102136;
+  --surface-elevated: #172d47;
+  --ink: #f5f9ff;
+  --ink-muted: #b6cce3;
+  --primary: #5de6f5;
+  --on-primary: #00363f;
+  --primary-container: #0e3a4a;
+  --on-primary-container: #b5f2fa;
+  --secondary: #36d698;
+  --secondary-container: #123b32;
+  --on-secondary-container: #b4f7da;
+  --tertiary: #ffcd73;
+  --tertiary-container: #4b3712;
+  --on-tertiary-container: #ffe5b4;
+  --outline: #39516b;
+  --error: #ff8a91;
+  --error-container: #5d171e;
+  --on-error-container: #ffdadf;
+}
+
+body {
+  margin: 0;
+  font-family: "Noto Sans", system-ui, -apple-system, sans-serif;
+  background-color: var(--bg);
+  color: var(--ink);
+}
+
+.font-display {
+  font-family: "Space Grotesk", "Noto Sans", system-ui, sans-serif;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* MapLibre GL overrides to match clean GIS canvas */
+.maplibregl-ctrl-attrib,
+.maplibregl-ctrl-logo {
+  display: none !important;
+}
