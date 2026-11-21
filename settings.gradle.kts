@@ -12,6 +12,5 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-
-rootProject.name = "FVV GIS"
+rootProject.name = "fvv-gis"
 include(":app")

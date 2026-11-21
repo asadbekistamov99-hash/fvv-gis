@@ -1,23 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">FVV GIS</string>
-    <string name="app_full_title">FVV GIS Uzbekistan</string>
-    <string name="content_desc_hero_banner">Uzbekistan topographic GIS infrastructure map banner</string>
-    <string name="content_desc_app_logo">FVV GIS compass emblem</string>
-    <string name="content_desc_back">Back</string>
-    <string name="content_desc_refresh">Refresh</string>
-    <string name="content_desc_sync">Synchronization queue</string>
-    <string name="content_desc_notifications">Notifications</string>
-    <string name="content_desc_filters">Map layers and filters</string>
-    <string name="content_desc_gps">Locate my GPS position</string>
-    <string name="content_desc_measure">Measure distance on map</string>
-    <string name="content_desc_add_registry_item">Add new registry item</string>
-    <string name="content_desc_gis_sdk_info">GIS Mapping SDK placeholder details</string>
-    <string name="content_desc_markers_list">View map markers list</string>
-    <string name="content_desc_emergency_mode">Toggle emergency incident reporting mode</string>
-    <string name="content_desc_emergency_pin">Drop emergency pin at current GPS</string>
-    <string name="content_desc_dial_112">Call emergency number 112</string>
-    <string name="content_desc_pathfinding">Emergency vehicle shortest path tool</string>
-    <string name="content_desc_download_area">Download map area for offline access</string>
-    <string name="content_desc_queued_reports">Pending offline emergency reports queue</string>
 </resources>

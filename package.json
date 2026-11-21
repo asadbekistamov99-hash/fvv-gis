@@ -10,6 +10,7 @@
     "preview": "vite preview --host 0.0.0.0 --port 3000"
   },
   "dependencies": {
+    "@vis.gl/react-google-maps": "^1.10.2",
     "lucide-react": "^0.475.0",
     "maplibre-gl": "^5.1.0",
     "react": "^19.0.0",
@@ -18,6 +19,7 @@
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "@tailwindcss/vite": "^4.0.6",
+    "@types/google.maps": "^3.66.10",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "@vitejs/plugin-react": "^4.3.4",

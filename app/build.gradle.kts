@@ -1,8 +1,5 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.ksp)
+    id("com.android.application")
 }
 
 android {
@@ -15,12 +12,10 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
-        getByName("debug") {
+        create("debugConfig") {
             storeFile = file("${rootDir}/debug.keystore")
             storePassword = "android"
             keyAlias = "androiddebugkey"
@@ -37,7 +32,7 @@ android {
             )
         }
         debug {
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("debugConfig")
         }
     }
 
@@ -47,32 +42,12 @@ android {
     }
 
     buildFeatures {
-        compose = true
         buildConfig = true
     }
 }
 
 dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.compose.ui)
-    implementation(libs.androidx.compose.ui.graphics)
-    implementation(libs.androidx.compose.ui.tooling.preview)
-    implementation(libs.androidx.compose.material3)
-    implementation(libs.androidx.compose.material.icons.extended)
-    implementation(libs.androidx.navigation.compose)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
-    ksp(libs.androidx.room.compiler)
-    implementation(libs.androidx.datastore.preferences)
-    implementation(libs.coil.compose)
-    implementation(libs.maplibre.android)
-    testImplementation(libs.junit)
-    debugImplementation(libs.androidx.compose.ui.tooling)
+    implementation("androidx.core:core-ktx:1.15.0")
+    implementation("androidx.activity:activity-ktx:1.10.1")
+    implementation("androidx.webkit:webkit:1.12.1")
 }

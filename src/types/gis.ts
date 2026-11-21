@@ -313,6 +313,89 @@ export interface SyncFlushResult {
   conflicts: number;
 }
 
+export type BaseMapType = 'standard' | 'satellite' | 'terrain';
+
+export type MapDetailLayer = 'relief' | 'traffic' | 'transit' | 'cycling' | 'streetView';
+
+export type TrafficCongestionLevel = 'free' | 'moderate' | 'heavy' | 'jam';
+
+export interface TrafficCorridor {
+  id: string;
+  nameUz: string;
+  nameRu: string;
+  nameEn: string;
+  level: TrafficCongestionLevel;
+  speedKmh: number;
+  points: GeoPoint[];
+}
+
+export interface TransitRouteLine {
+  id: string;
+  nameUz: string;
+  nameRu: string;
+  nameEn: string;
+  mode: 'metro' | 'rail' | 'bus';
+  colorHex: string;
+  points: GeoPoint[];
+}
+
+export interface TransitStopPoint {
+  id: string;
+  lineId: string;
+  nameUz: string;
+  nameRu: string;
+  nameEn: string;
+  mode: 'metro' | 'rail' | 'bus';
+  colorHex: string;
+  point: GeoPoint;
+}
+
+export interface CyclingPathRoute {
+  id: string;
+  nameUz: string;
+  nameRu: string;
+  nameEn: string;
+  distanceKm: number;
+  points: GeoPoint[];
+}
+
+export interface ReliefPeakFeature {
+  id: string;
+  nameUz: string;
+  nameRu: string;
+  nameEn: string;
+  elevationM: number;
+  point: GeoPoint;
+  contourRing: GeoPoint[];
+}
+
+export interface StreetViewPanorama {
+  id: string;
+  titleUz: string;
+  titleRu: string;
+  titleEn: string;
+  subtitleUz: string;
+  subtitleRu: string;
+  subtitleEn: string;
+  regionId: string;
+  point: GeoPoint;
+  defaultHeadingDeg: number;
+  palette: {
+    skyTop: string;
+    skyBottom: string;
+    horizon: string;
+    ground: string;
+    accent: string;
+  };
+  landmarks: {
+    bearingDeg: number;
+    labelUz: string;
+    labelRu: string;
+    labelEn: string;
+    kind: 'dome' | 'tower' | 'arch' | 'building' | 'park' | 'mountain';
+  }[];
+}
+
 export type AppRoute =
   | { name: 'home' }
   | { name: 'map' }
@@ -326,4 +409,6 @@ export type AppRoute =
   | { name: 'sync' }
   | { name: 'notifications' }
   | { name: 'profile' }
-  | { name: 'auth' };
+  | { name: 'auth' }
+  | { name: 'admin' };
+

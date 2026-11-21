@@ -1,5 +1,2 @@
-# ProGuard rules for FVV GIS Uzbekistan
+# Keep WebView and AndroidX interfaces
 -keepattributes *Annotation*
--keepclassmembers class * {
-    @kotlinx.serialization.SerialName <fields>;
-}
